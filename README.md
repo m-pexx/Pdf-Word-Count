@@ -1,6 +1,15 @@
 # Pdf-Word-Count
-Get count of words in a pdf file
+Get count of words in a pdf file.
 
+### Changelog
+
+* added multiprocessing capabilities.
+* pep8 formatted
+
+### ToDo
+
+* read all pdf on a folder
+* binary package
 
 ### Requirements:
 
