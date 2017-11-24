@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import multiprocessing as mp
 import os
 import sys
 import re
@@ -12,6 +13,7 @@ def getPageCount(pdf_file):
     pages = pdfReader.numPages
     return pages
 
+
 def extractData(pdf_file, page):
     pdfFileObj = open(pdf_file, 'rb')
     pdfReader = PyPDF2.PdfFileReader(pdfFileObj)
@@ -19,9 +21,21 @@ def extractData(pdf_file, page):
     data = pageObj.extractText()
     return data
 
+
 def getWordCount(data):
     data = data.split()
     return len(data)
+
+def parCount(values):
+    text = extractData(values[0], values[1])
+    return(getWordCount(text))
+
+
+def parallelize(fun,vec,pool):
+    with mp.Pool(pool) as p:
+        res = p.map(fun,vec)
+    return(res)
+
 
 def main():
     if len(sys.argv)!=2:
@@ -39,9 +53,15 @@ def main():
     # get the word count in the pdf file
     totalWords = 0
     numPages = getPageCount(pdfFile)
-    for i in range(numPages):
-        text = extractData(pdfFile, i)
-        totalWords+=getWordCount(text)
+    ncpu = mp.cpu_count()
+    if ncpu ==1:
+        for i in range(numPages):
+            text = extractData(pdfFile, i)
+            totalWords+=getWordCount(text)
+    else:
+        totalWords = sum(parallelize(fun=parCount,
+                                     vec=zip([pdfFile]*numPages,
+                                     range(numPages)),pool=ncpu))
 
     print (totalWords)
 
